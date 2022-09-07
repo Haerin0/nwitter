@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AppRouter from "./Router";
 import { authService } from "../firebase";
 
 function App() {
+  const [init, setInit] = useState(false);
   const [isLoggedIn, setisLoggedIn] = useState(false);
-  console.log(authService.currentUser); //로그인한 상태가 아니면 null을 반환
+
+  useEffect (() => {
+    authService.onAuthStateChanged((user) => {
+      if (user) {
+        setisLoggedIn(user);
+      } else {
+        setisLoggedIn(false);
+      }
+      setInit(true);
+    });
+  },[]);
+
+
   return (
     <>
-      <AppRouter isLoggedIn={isLoggedIn} />
+      {init ? <AppRouter isLoggedIn={isLoggedIn}/> : "initializing"}
       <footer>&copy; {new Date().getFullYear()} Nwitter</footer>
     </>
   );

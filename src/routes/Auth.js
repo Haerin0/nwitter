@@ -1,10 +1,15 @@
-import { authService } from "../fbase";
+import { authService } from "fbase";
 import { useState } from "react";
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+  } from "firebase/auth";
 
 const Auth = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccount] = useState(true);
+    const [error, setError] = useState("");
 
     const onChange = (event) => {
         const {
@@ -12,47 +17,57 @@ const Auth = () => {
         } = event;
         if (name === "email") {
             setEmail(value);
-        } else if  (name === "password") {
-            setPassword(value);
+        } else if (name === "password") {
+            setPassword(value)
         }
     };
 
-    const onSubmit = (event) => {
-        event.preventDefault(); //새로고침 방지
-        if (newAccount) {
-            //create new account
-        } else {
-            // log in
-        }
-    };
-
-    return (
-        <div>
-            <form onSubmit={onSubmit}>
-                <input 
-                    name="email"
-                    type="email" 
-                    placeholder="Email"
-                    required 
-                    value={email}
-                    onChange={onChange}
-                 />
-                <input 
-                    name="password"
-                    type="password" 
-                    placeholder="Password" 
-                    required 
-                    value={password}
-                    onChange={onChange}
-                />
-                <input type="submit" value={newAccount ? "Create Account" : "Log In"} />
-            </form>
+    const onSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            let data;
+            if (newAccount) {
+                //create newAccount
+                data = await createUserWithEmailAndPassword(authService,email,password);
+            } else {
+                // log in
+                data = await signInWithEmailAndPassword(authService, email,password);
+            }
+            console.log(data);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+        return (
             <div>
-                <button>Continue with Google</button>
-                <button>Continue with Github</button>
+                <form onSubmit={onSubmit}>
+                    <input 
+                        name="email"
+                        type="email" 
+                        placeholder="Email" 
+                        required
+                        value={email}
+                        onChange={onChange} 
+                    />
+                    <input 
+                        name="password"
+                        type="password" 
+                        placeholder="Password" 
+                        required
+                        value={password}
+                        onChange={onChange}       
+                    />
+                    <input type="submit" value={newAccount ? "Create Account" : "Log In"} />
+                    {error}
+                </form>
+                <div>
+                    <button>Continue with Google</button>
+                    <button>Continue with Github</button>
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    };
+
+    
 
 export default Auth;

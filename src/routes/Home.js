@@ -1,42 +1,45 @@
 import { dbService } from "fbase";
-import { addDoc, collection, getDocs, query } from "firebase/firestore";
+import { addDoc, collection, getDocs, query,orderBy,onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [nweet, setNweet] = useState("");
     const [nweets, setNweets] = useState([]);
-
-    const getNweets = async () => {
-        const q = query(collection(dbService, "nweets"));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-        const nweetObj = {...doc.data(),id: doc.id,}
-        setNweets(prev => [nweetObj, ...prev]);
-            });
-        };
-        useEffect(() => {
-        getNweets();
-        }, []);
-
-
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        try {
-        const docRef = await addDoc(collection(dbService, "nweets"), {
-        nweet,
-        createdAt: Date.now(),
+    
+    useEffect(() => {
+        const q = query(
+            collection(dbService, "nweets"),
+            orderBy("createdAt", "desc")
+        );
+        onSnapshot(q, (snapshot) => {
+        const nweetArr = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+            setNweets(nweetArr);
         });
-        console.log("Document written with ID: ", docRef.id);
-        } catch (error) {
-        console.error("Error adding document: ", error);
-        }
+        }, []);
+    
+    const onSubmit = async (event) => {
+        event.preventDefault();
+    try { const docRef = await addDoc(collection(dbService, "nweets"), {
+        text: nweet,
+        createdAt: Date.now(),
+        creatorId: userObj.uid,
+    });
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
         setNweet("");
     };
+    const onChange = (event) => {
+    const {
+        target: { value },
+    } = event;
+        setNweet(value);
+    };
 
-const onChange = ({ target: { value } }) => {
-setNweet(value);
-};
 return (
         <>
             <form onSubmit={onSubmit}>

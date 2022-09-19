@@ -13,9 +13,7 @@ function App() {
       if (user) {
         setIsLoggedIn(user);
         setUserObj(user);
-      } else {
-        setIsLoggedIn(false);
-      }
+      } 
       setInit(true);
     });
   }, []);
@@ -23,7 +21,7 @@ function App() {
   return (
     <>
     {init ? (
-      <AppRouter isLoggedIn={isLoggedIn} userObj={userObj} />
+      <AppRouter isLoggedIn={Boolean(userObj)} userObj={userObj} />
       ) :( 
         "initializing..."
         )}

@@ -5,7 +5,7 @@ import { dbService } from "../fbase";
 import { collection, getDocs, query, where } from "@firebase/firestore";
 import { async } from "@firebase/util";
 
-const Profile = ( { userObj } ) => {
+const Profile = ( { refreshUser,userObj } ) => {
     const navigate = useNavigate();
     const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
     const auth = getAuth();
@@ -27,6 +27,7 @@ const Profile = ( { userObj } ) => {
             await updateProfile(userObj, { 
                 displayName: newDisplayName 
             });
+            // refreshUser();
         }
     }
 
